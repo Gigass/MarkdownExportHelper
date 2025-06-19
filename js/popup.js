@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
   const themeStyle = document.getElementById('theme-style');
   const bodyEl = document.body;
+  const languageSelect = document.getElementById('language-select');
   // History Elements
   const historyBtn = document.getElementById('history-btn');
   const historyModal = document.getElementById('history-modal');
@@ -22,6 +23,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 强制隐藏loading，防止初始显示
   loadingElement.classList.add('hidden');
+
+  // 初始化语言
+  let currentLang = localStorage.getItem('language') || 'zh';
+  languageSelect.value = currentLang;
+
+  // 更新UI文本
+  function updateUIText() {
+    document.querySelector('h1').textContent = translations[currentLang].title;
+    document.querySelector('.input-section h2').textContent = translations[currentLang].input;
+    document.querySelector('.preview-section h2').textContent = translations[currentLang].preview;
+    pasteButton.textContent = translations[currentLang].paste;
+    clearButton.textContent = translations[currentLang].clear;
+    historyBtn.textContent = translations[currentLang].history;
+    exportImageButton.textContent = translations[currentLang].exportImage;
+    exportPdfButton.textContent = translations[currentLang].exportPdf;
+    exportHtmlButton.textContent = translations[currentLang].exportHtml;
+    exportMdButton.textContent = translations[currentLang].exportMd;
+    document.querySelector('#loading p').textContent = translations[currentLang].loading;
+    document.querySelector('.modal-header h2').textContent = translations[currentLang].history;
+    clearHistoryBtn.textContent = translations[currentLang].clearHistory;
+  }
+
+  // 语言切换事件
+  languageSelect.addEventListener('change', (e) => {
+    currentLang = e.target.value;
+    localStorage.setItem('language', currentLang);
+    updateUIText();
+  });
 
   // 初始化marked配置
   marked.setOptions({
@@ -44,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     markdownInput.value = '';
     renderMarkdown();
     localStorage.setItem('isCleared', 'true'); // Set the cleared state
-    showMessage('已清空内容', 'success');
+    showMessage('clearSuccess', 'success');
   });
 
   // 导出为长图
@@ -74,9 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
   closeHistoryModalBtn.addEventListener('click', () => historyModal.classList.add('hidden'));
   clearHistoryBtn.addEventListener('click', handleClearHistory);
 
-  // 初始化，尝试从剪贴板读取内容
+  // 初始化
   async function init() {
     loadingElement.classList.add('hidden');
+    
+    // 更新UI文本
+    updateUIText();
     
     // Load theme
     const savedTheme = localStorage.getItem('theme');
@@ -87,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isCleared === 'true') {
       markdownInput.value = '';
       renderMarkdown();
-      return; // Stop further execution to keep the editor empty
+      return;
     }
 
     // Load history and decide initial content
@@ -95,9 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (history.length > 0) {
       markdownInput.value = history[0].content;
       renderMarkdown();
-      showMessage('已加载最新历史记录', 'success');
+      showMessage('loadHistorySuccess', 'success');
     } else {
-      // If no history, try to paste from clipboard
       pasteAndRenderFromClipboard(true);
     }
   }
@@ -129,12 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (text && text.trim()) {
         markdownInput.value = text;
         renderMarkdown();
-        if (!isSilent) showMessage('已从剪贴板粘贴内容', 'success');
+        if (!isSilent) showMessage('pasteSuccess', 'success');
       } else if (!isSilent) {
-        showMessage('剪贴板为空', 'error');
+        showMessage('clipboardEmpty', 'error');
       }
     } catch (error) {
-      if (!isSilent) showMessage('无法读取剪贴板内容', 'error');
+      if (!isSilent) showMessage('clipboardError', 'error');
       console.error('剪贴板读取失败:', error);
     }
   }
@@ -142,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 导出为长图
   async function exportAsImage() {
     if (!markdownInput.value.trim()) {
-      showMessage('请先输入Markdown内容', 'error');
+      showMessage('noContent', 'error');
       return;
     }
 
@@ -199,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const timestamp = new Date().getTime();
       downloadFile(imageData, `markdown_${timestamp}.png`);
 
-      showMessage('长图导出成功！', 'success');
+      showMessage('exportImageSuccess', 'success');
     } catch (error) {
-      showMessage('导出长图失败，请重试', 'error');
+      showMessage('exportImageError', 'error');
       console.error('导出长图错误:', error);
     } finally {
       showLoading(false);
@@ -211,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 导出为PDF
   async function exportAsPdf() {
     if (!markdownInput.value.trim()) {
-      showMessage('请先输入Markdown内容', 'error');
+      showMessage('noContent', 'error');
       return;
     }
 
@@ -298,9 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const timestamp = new Date().getTime();
       pdf.save(`markdown_${timestamp}.pdf`);
 
-      showMessage('PDF导出成功！', 'success');
+      showMessage('exportPdfSuccess', 'success');
     } catch (error) {
-      showMessage('导出PDF失败，请重试', 'error');
+      showMessage('exportPdfError', 'error');
       console.error('导出PDF错误:', error);
     } finally {
       showLoading(false);
@@ -311,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function exportAsMd() {
     const content = markdownInput.value;
     if (!content.trim()) {
-      showMessage('内容为空，无需导出', 'error');
+      showMessage('noContent', 'error');
       return;
     }
     const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
@@ -323,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function exportAsHtml() {
     const previewContent = previewContainer.innerHTML;
     if (!previewContent.trim()) {
-      showMessage('内容为空，无法导出HTML', 'error');
+      showMessage('noContent', 'error');
       return;
     }
 
@@ -364,9 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const timestamp = new Date().getTime();
       downloadFile(URL.createObjectURL(blob), `markdown_${timestamp}.html`, true);
-      showMessage('HTML导出成功！', 'success');
+      showMessage('exportHtmlSuccess', 'success');
     } catch (error) {
-      showMessage('导出HTML失败', 'error');
+      showMessage('exportHtmlError', 'error');
       console.error('导出HTML错误:', error);
     } finally {
       showLoading(false);
@@ -391,12 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 显示消息
   function showMessage(text, type) {
-    messageElement.textContent = text;
-    messageElement.className = 'message';
-    messageElement.classList.add(type);
+    const key = text in translations[currentLang] ? text : 'unknown';
+    const message = translations[currentLang][key] || text;
+    messageElement.textContent = message;
+    messageElement.className = `message ${type}`;
     messageElement.classList.remove('hidden');
-
-    // 3秒后自动隐藏
     setTimeout(() => {
       messageElement.classList.add('hidden');
     }, 3000);
@@ -443,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
           markdownInput.value = history[index].content;
           renderMarkdown();
           historyModal.classList.add('hidden');
-          showMessage('已从历史记录恢复', 'success');
+          showMessage('restoreHistorySuccess', 'success');
       }
   }
   
@@ -451,14 +481,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if(confirm('您确定要清空所有历史记录吗？此操作无法撤销。')) {
           await chrome.storage.local.set({ history: [] });
           renderHistoryUI([]);
-          showMessage('历史记录已清空', 'success');
+          showMessage('clearHistorySuccess', 'success');
       }
   }
 
   // --- Export Handling ---
   async function handleExport(exportFunc) {
       if (!markdownInput.value.trim()) {
-          showMessage('内容为空，无法导出', 'error');
+          showMessage('noContent', 'error');
           return;
       }
       // Any export action clears the 'cleared' state

@@ -12,13 +12,22 @@
   <div class="container">
     <div class="header-controls">
       <h1>Markdown导出助手</h1>
-      <div class="theme-switcher">
-        <span class="theme-icon">☀️</span>
-        <label class="switch">
-          <input type="checkbox" id="theme-toggle">
-          <span class="slider round"></span>
-        </label>
-        <span class="theme-icon">🌙</span>
+      <div class="controls-right">
+        <select id="language-select" class="language-select">
+          <option value="zh">简体中文</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+        </select>
+        <div class="theme-switcher">
+          <span class="theme-icon">☀️</span>
+          <label class="switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider round"></span>
+          </label>
+          <span class="theme-icon">🌙</span>
+        </div>
       </div>
     </div>
     
@@ -76,6 +85,7 @@
   <script src="lib/purify.min.js"></script>
   
   <!-- 引入自定义脚本 -->
+  <script src="js/translations.js"></script>
   <script src="js/popup.js"></script>
 </body>
 </html> 
