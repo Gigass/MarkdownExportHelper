@@ -637,4 +637,38 @@ body.dark-mode .add-snippet-form textarea {
   background-color: #3a3b3c;
   border-color: #4e4f50;
   color: #e4e6eb;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  color: #24292f;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.dark-mode .github-link {
+  color: #c9d1d9;
+}
+
+.github-link:hover {
+  color: #0366d6;
+}
+
+.dark-mode .github-link:hover {
+  color: #58a6ff;
+}
+
+.github-icon {
+  transition: transform 0.2s ease;
+}
+
+.github-link:hover .github-icon {
+  transform: scale(1.1);
 } 
