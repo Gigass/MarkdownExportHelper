@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown导出助手</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- 引入Markdown主题样式 -->
+  <link id="theme-style" rel="stylesheet" href="">
+</head>
+<body>
+  <div class="container">
+    <div class="header-controls">
+      <h1>Markdown导出助手</h1>
+      <div class="theme-switcher">
+        <span class="theme-icon">☀️</span>
+        <label class="switch">
+          <input type="checkbox" id="theme-toggle">
+          <span class="slider round"></span>
+        </label>
+        <span class="theme-icon">🌙</span>
+      </div>
+    </div>
+    
+    <div class="input-section">
+      <h2>Markdown输入</h2>
+      <textarea id="markdown-input" placeholder="在此粘贴Markdown文本..."></textarea>
+      <button id="paste-button">从剪贴板粘贴</button>
+      <button id="clear-button">清空</button>
+    </div>
+    
+    <div class="pro-features">
+      <button id="history-btn" class="control-element">历史记录</button>
+    </div>
+    
+    <div class="preview-section">
+      <h2>预览</h2>
+      <div id="preview-container" class="markdown-body"></div>
+    </div>
+    
+    <div class="export-section">
+      <button id="export-image" class="export-btn">导出为长图</button>
+      <button id="export-pdf" class="export-btn">导出为PDF</button>
+      <button id="export-html" class="export-btn">导出HTML</button>
+      <button id="export-md" class="export-btn">导出MD</button>
+    </div>
+    
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <p>正在导出，请稍候...</p>
+    </div>
+    
+    <div id="message" class="hidden"></div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>历史记录</h2>
+        <button id="close-history-modal" class="close-btn">&times;</button>
+      </div>
+      <div id="history-list">
+        <!-- History items will be dynamically inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button id="clear-history-btn">清空历史记录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入第三方库 -->
+  <script src="lib/marked.min.js"></script>
+  <script src="lib/html2canvas.min.js"></script>
+  <script src="lib/jspdf.umd.min.js"></script>
+  <script src="lib/purify.min.js"></script>
+  
+  <!-- 引入自定义脚本 -->
+  <script src="js/popup.js"></script>
+</body>
+</html> 

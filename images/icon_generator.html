@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Markdown导出助手图标生成器</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 20px 0;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Markdown导出助手图标生成器</h1>
+  
+  <canvas id="icon16" width="16" height="16"></canvas>
+  <canvas id="icon48" width="48" height="48"></canvas>
+  <canvas id="icon128" width="128" height="128"></canvas>
+  
+  <div class="buttons">
+    <button onclick="downloadIcon(16)">下载 16x16 图标</button>
+    <button onclick="downloadIcon(48)">下载 48x48 图标</button>
+    <button onclick="downloadIcon(128)">下载 128x128 图标</button>
+  </div>
+  
+  <script>
+    // 绘制图标函数
+    function drawIcon(size) {
+      const canvas = document.getElementById(`icon${size}`);
+      const ctx = canvas.getContext('2d');
+      
+      // 背景
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillRect(0, 0, size, size);
+      
+      // 文档图标
+      ctx.fillStyle = 'white';
+      const docWidth = size * 0.7;
+      const docHeight = size * 0.8;
+      const docX = (size - docWidth) / 2;
+      const docY = (size - docHeight) / 2;
+      ctx.fillRect(docX, docY, docWidth, docHeight);
+      
+      // 文档折角
+      ctx.fillStyle = '#ddd';
+      const cornerSize = size * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(docX + docWidth - cornerSize, docY);
+      ctx.lineTo(docX + docWidth, docY + cornerSize);
+      ctx.lineTo(docX + docWidth, docY);
+      ctx.fill();
+      
+      // MD文本
+      ctx.fillStyle = '#4CAF50';
+      ctx.font = `bold ${size * 0.3}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('MD', size / 2, size / 2);
+      
+      // 导出箭头
+      const arrowSize = size * 0.25;
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.moveTo(size - arrowSize, size - arrowSize * 0.5);
+      ctx.lineTo(size - arrowSize * 0.5, size - arrowSize);
+      ctx.lineTo(size - arrowSize * 0.5, size - arrowSize * 0.75);
+      ctx.lineTo(size - arrowSize * 0.25, size - arrowSize * 0.75);
+      ctx.lineTo(size - arrowSize * 0.25, size - arrowSize * 0.25);
+      ctx.lineTo(size - arrowSize * 0.5, size - arrowSize * 0.25);
+      ctx.lineTo(size - arrowSize * 0.5, size);
+      ctx.lineTo(size, size - arrowSize * 0.5);
+      ctx.fill();
+    }
+    
+    // 下载图标函数
+    function downloadIcon(size) {
+      const canvas = document.getElementById(`icon${size}`);
+      const link = document.createElement('a');
+      link.download = `icon${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // 初始化绘制所有尺寸的图标
+    window.onload = function() {
+      drawIcon(16);
+      drawIcon(48);
+      drawIcon(128);
+    };
+  </script>
+</body>
+</html> 
