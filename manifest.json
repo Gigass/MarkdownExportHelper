@@ -18,7 +18,6 @@
   },
   "permissions": [
     "clipboardRead",
-    "downloads",
     "storage"
   ],
   "web_accessible_resources": [{

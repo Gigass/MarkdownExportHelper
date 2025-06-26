@@ -409,7 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = document.createElement('a');
     link.href = data;
     link.download = fileName;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     if (shouldRevoke) {
       URL.revokeObjectURL(data);
     }
