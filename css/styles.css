@@ -474,78 +474,89 @@ input:checked + .slider:before {
   text-align: center;
 }
 
-/* 通知样式 */
+/* 通知系统样式 */
 #notification-container {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .notification {
-  background-color: #fff;
-  color: var(--text-light);
-  border-left: 4px solid var(--primary-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 12px 20px;
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-width: 300px;
-  max-width: 400px;
-  animation: slideIn 0.3s ease-out forwards;
-  transition: all 0.3s;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #fff;
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 320px;
+  border-left: 5px solid transparent;
 }
 
 .notification.closing {
-  animation: slideOut 0.3s ease-in forwards;
+  opacity: 0;
+  transform: translateX(100%);
 }
 
 .notification-success {
-  border-left-color: #0ca678;
+  background-color: #28a745;
+  border-left-color: #218838;
 }
 
 .notification-error {
-  border-left-color: #e03131;
+  background-color: #dc3545;
+  border-left-color: #c82333;
 }
 
 .notification-warning {
-  border-left-color: #f59f00;
+  background-color: #ffc107;
+  color: #212529;
+  border-left-color: #e0a800;
 }
 
 .notification-info {
-  border-left-color: #1c7ed6;
+  background-color: #17a2b8;
+  border-left-color: #138496;
 }
 
 .notification-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-grow: 1;
 }
 
 .notification-icon {
   font-size: 20px;
+  margin-right: 12px;
 }
 
 .notification-message {
-  font-size: 14px;
+  flex-grow: 1;
+  font-weight: 500;
 }
 
 .notification-close {
   background: none;
   border: none;
-  color: #adb5bd;
+  color: inherit;
+  font-size: 22px;
   cursor: pointer;
-  font-size: 16px;
-  margin: 0;
-  padding: 0;
-  transition: color 0.2s;
+  opacity: 0.7;
+  padding: 0 5px;
+  margin: -10px -5px;
+  line-height: 1;
 }
 
 .notification-close:hover {
-  color: var(--text-light);
+  opacity: 1;
+  background-color: transparent;
   transform: none;
   box-shadow: none;
 }
@@ -568,7 +579,7 @@ input:checked + .slider:before {
   }
   to {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(100%);
   }
 }
 

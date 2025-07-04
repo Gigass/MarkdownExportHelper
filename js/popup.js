@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // 显示通知
-  function showNotification(message, type = 'info', duration = 3000) {
+  function showNotification(message, type = 'info', duration = 2000) {
     // 定义通知图标
     const icons = {
       'success': '✅',
@@ -254,25 +254,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderHistoryUI(history) {
     historyList.innerHTML = '';
     if (history.length === 0) {
-      const emptyMessage = document.createElement('p');
-      emptyMessage.textContent = translations[currentLang].historyEmpty || '没有历史记录';
-      emptyMessage.style.padding = '20px';
-      emptyMessage.style.textAlign = 'center';
-      historyList.appendChild(emptyMessage);
+      historyList.innerHTML = `<p class="empty-history">没有历史记录</p>`;
       return;
     }
 
     history.forEach((item, index) => {
-      const historyItem = document.createElement('div');
-      historyItem.className = 'history-item';
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'history-item';
       
-      const name = document.createElement('div');
-      name.className = 'item-name';
-      name.textContent = item.name || `记录 ${index + 1}`;
+      const itemName = document.createElement('span');
+      itemName.className = 'item-name';
+      // 优先使用item.title，兼容旧数据
+      itemName.textContent = item.title || `记录 ${new Date(item.date).toLocaleString()}`;
       
-      const date = document.createElement('div');
-      date.className = 'item-date';
-      date.textContent = new Date(item.date).toLocaleString();
+      const itemDate = document.createElement('span');
+      itemDate.className = 'item-date';
+      itemDate.textContent = new Date(item.date).toLocaleString();
       
       const actions = document.createElement('div');
       actions.className = 'item-actions';
@@ -289,11 +286,11 @@ document.addEventListener('DOMContentLoaded', () => {
       actions.appendChild(restoreBtn);
       actions.appendChild(deleteBtn);
       
-      historyItem.appendChild(name);
-      historyItem.appendChild(date);
-      historyItem.appendChild(actions);
+      itemDiv.appendChild(itemName);
+      itemDiv.appendChild(itemDate);
+      itemDiv.appendChild(actions);
       
-      historyList.appendChild(historyItem);
+      historyList.appendChild(itemDiv);
     });
   }
   
@@ -359,19 +356,28 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveToHistory() {
     const content = markdownInput.value.trim();
     if (!content) return;
-    
+
     try {
-      // 获取现有历史
       const history = JSON.parse(localStorage.getItem('markdownHistory')) || [];
+      const now = new Date();
       
-      // 添加新条目
+      // 检查是否存在完全相同的记录
+      const isDuplicate = history.some(item => item.content.trim() === content);
+      if (isDuplicate) return;
+
+      // 生成标题：取第一个非空行，并截断
+      const firstLine = content.split('\n').find(line => line.trim() !== '');
+      let title = firstLine ? firstLine.trim() : '无标题';
+      if (title.length > 40) {
+        title = title.substring(0, 40) + '...';
+      }
+
       const newEntry = {
-        content,
-        date: new Date().toISOString(),
-        name: `记录 ${history.length + 1}`
+        title: title,
+        content: content,
+        date: now.toISOString(),
       };
       
-      // 插入到开头
       history.unshift(newEntry);
       
       // 限制最大记录数
