@@ -41,8 +41,10 @@ MarkdownExportHelper/
 ├── lib/                     # 第三方库
 │   ├── html2canvas.min.js   # HTML 转图片
 │   ├── jspdf.umd.min.js     # HTML 转 PDF
-│   ├── marked.min.js        # Markdown 解析
+│   ├── markdown-it.min.js   # Markdown 解析
+│   ├── docx.min.js          # Word 文档生成
 │   └── purify.min.js        # 安全处理
+│   └── html-docx.min.js     # 用于将HTML片段高质量导出为Word文档（.docx）
 ├── manifest.json            # Chrome 扩展配置
 ├── popup.html               # 主界面
 ├── LICENSE                  # Apache License 2.0
@@ -90,7 +92,7 @@ MarkdownExportHelper/
 ### js/ - 核心 JavaScript
 **目的**: 存放项目的核心 JavaScript 代码
 
-- **popup.js**: 扩展的主要逻辑，包含所有核心功能
+- **popup.js**: 扩展的主要逻辑，包含所有核心功能（包括Word导出）
 - **translations.js**: 多语言支持，包含中文、英文、法语等翻译
 
 ### lib/ - 第三方库
@@ -98,8 +100,10 @@ MarkdownExportHelper/
 
 - **html2canvas.min.js**: 用于将 HTML 元素转换为图片
 - **jspdf.umd.min.js**: 用于生成 PDF 文档
-- **marked.min.js**: 用于解析和渲染 Markdown
+- **markdown-it.min.js**: 用于解析和渲染 Markdown
+- **docx.min.js**: 用于生成 Word 文档
 - **purify.min.js**: 用于安全处理 HTML 内容
+- **html-docx.min.js**: 用于将HTML片段高质量导出为Word文档（.docx）
 
 ### 根目录文件
 **目的**: 项目的配置和说明文件
@@ -122,7 +126,8 @@ popup.html
 │   ├── translations.js                # 语言支持（优先加载）
 │   └── popup.js                       # 主要逻辑（最后加载）
 └── lib/
-    ├── marked.min.js                  # Markdown 解析
+    ├── markdown-it.min.js             # Markdown 解析
+    ├── docx.min.js                    # Word 文档生成
     ├── purify.min.js                  # 安全处理
     ├── html2canvas.min.js             # 图片转换
     └── jspdf.umd.min.js               # PDF 生成

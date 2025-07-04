@@ -18,6 +18,7 @@
 ### 2. 多格式导出
 - **长图导出**: 将 Markdown 内容导出为 PNG 长图
 - **PDF 导出**: 生成包含样式的 PDF 文档
+- **Word 导出**: 导出为 .docx 格式的 Word 文档（基于 html-docx-js，支持高质量格式还原）
 - **HTML 导出**: 导出为独立的 HTML 文件
 - **原始 MD 导出**: 保存为 Markdown 源文件
 
@@ -35,7 +36,8 @@
 - **响应式设计**: 适配不同屏幕尺寸
 
 ### 核心依赖库
-- **marked.js**: Markdown 解析和渲染
+- **markdown-it**: Markdown 解析和渲染
+- **docx**: Word 文档生成功能
 - **html2canvas**: HTML 转图片功能
 - **jsPDF**: HTML 转 PDF 功能
 - **DOMPurify**: 安全处理 HTML 内容
@@ -65,7 +67,8 @@ MarkdownExportHelper/
 ├── lib/                    # 第三方库
 │   ├── html2canvas.min.js
 │   ├── jspdf.umd.min.js
-│   ├── marked.min.js
+│   ├── markdown-it.min.js
+│   ├── docx.min.js
 │   └── purify.min.js
 ├── manifest.json          # 扩展配置
 ├── popup.html             # 主界面

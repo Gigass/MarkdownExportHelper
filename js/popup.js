@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearButton = document.getElementById('clear-button');
   const exportImageButton = document.getElementById('export-image');
   const exportPdfButton = document.getElementById('export-pdf');
+  const exportWordButton = document.getElementById('export-word');
   const exportHtmlButton = document.getElementById('export-html');
   const exportMdButton = document.getElementById('export-md');
   const loadingElement = document.getElementById('loading');
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     historyBtn.textContent = translations[currentLang].history;
     exportImageButton.textContent = translations[currentLang].exportImage;
     exportPdfButton.textContent = translations[currentLang].exportPdf;
+    exportWordButton.textContent = translations[currentLang].exportWord;
     exportHtmlButton.textContent = translations[currentLang].exportHtml;
     exportMdButton.textContent = translations[currentLang].exportMd;
     document.querySelector('#loading p').textContent = translations[currentLang].loading;
@@ -52,14 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUIText();
   });
 
-  // 初始化marked配置
-  marked.setOptions({
+  // 初始化markdown-it配置
+  const md = window.markdownit({
     breaks: true,
-    gfm: true,
-    headerIds: true,
-    highlight: function(code, lang) {
-      return code;
-    }
+    html: true,
+    linkify: true,
+    typographer: true
   });
 
   // 实时预览功能
@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 导出为PDF
   exportPdfButton.addEventListener('click', () => handleExport(exportAsPdf));
+
+  // 导出为Word
+  exportWordButton.addEventListener('click', () => handleExport(exportAsWord));
 
   // 导出为HTML
   exportHtmlButton.addEventListener('click', () => handleExport(exportAsHtml));
@@ -149,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 渲染Markdown为HTML
   function renderMarkdown() {
     const markdown = markdownInput.value;
-    const html = DOMPurify.sanitize(marked.parse(markdown || ' ')); // Ensure not empty for parsing
+    const html = DOMPurify.sanitize(md.render(markdown || ' ')); // Ensure not empty for parsing
     previewContainer.innerHTML = html;
   }
 
@@ -333,6 +336,55 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       showMessage('exportPdfError', 'error');
       console.error('导出PDF错误:', error);
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // 导出为Word
+  async function exportAsWord() {
+    if (!markdownInput.value.trim()) {
+      showMessage('noContent', 'error');
+      return;
+    }
+    showLoading(true);
+    try {
+      // 获取预览区HTML
+      const previewContent = previewContainer.innerHTML;
+      if (!previewContent.trim()) {
+        showMessage('noContent', 'error');
+        showLoading(false);
+        return;
+      }
+      // 包裹完整HTML结构，保证样式
+      const isDark = themeToggle.checked;
+      const themeCssUrl = isDark ? 'github-markdown-dark.min.css' : 'github-markdown-light.min.css';
+      const themeCss = await fetch(chrome.runtime.getURL(`css/${themeCssUrl}`)).then(res => res.text());
+      const html = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: sans-serif; padding: 2rem 4rem; }
+    .markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; }
+    ${themeCss}
+  </style>
+</head>
+<body class="${isDark ? 'dark-mode' : ''}">
+  <article class="markdown-body">
+    ${previewContent}
+  </article>
+</body>
+</html>`;
+      // 用html-docx-js生成Word Blob
+      const converted = window.htmlDocx.asBlob(html);
+      const timestamp = new Date().getTime();
+      downloadFile(URL.createObjectURL(converted), `markdown_${timestamp}.docx`, true);
+      showMessage('exportWordSuccess', 'success');
+    } catch (error) {
+      showMessage('exportWordError', 'error');
+      console.error('导出Word错误:', error);
     } finally {
       showLoading(false);
     }

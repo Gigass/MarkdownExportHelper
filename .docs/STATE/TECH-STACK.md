@@ -15,10 +15,10 @@
 ## 核心依赖库
 
 ### Markdown 处理
-- **marked.js** (v4.0.0+)
+- **markdown-it** (v13.0.0+)
   - **用途**: Markdown 解析和渲染
   - **许可证**: MIT
-  - **功能**: 将 Markdown 文本转换为 HTML
+  - **功能**: 将 Markdown 文本转换为 HTML 或 AST
   - **集成方式**: 通过 `<script>` 标签引入
 
 ### 文档转换
@@ -33,6 +33,12 @@
   - **许可证**: MIT
   - **功能**: 生成包含样式的 PDF 文档
   - **集成方式**: 通过 `<script>` 标签引入
+
+- **html-docx-js** (master)
+  - **用途**: HTML 转 Word（.docx）
+  - **许可证**: MIT
+  - **功能**: 将HTML片段高质量导出为Word文档，支持样式、图片、表格等
+  - **集成方式**: 通过 <script> 标签引入
 
 ### 安全处理
 - **DOMPurify** (v3.0.0+)
@@ -61,7 +67,8 @@ popup.html
 │   ├── popup.js                       # 主要逻辑
 │   └── translations.js                # 多语言支持
 └── lib/
-    ├── marked.min.js                  # Markdown 解析
+    ├── markdown-it.min.js             # Markdown 解析
+    ├── docx.min.js                    # Word 文档生成
     ├── html2canvas.min.js             # HTML 转图片
     ├── jspdf.umd.min.js               # HTML 转 PDF
     └── purify.min.js                  # 安全处理
@@ -70,7 +77,7 @@ popup.html
 ### 加载顺序
 1. **基础样式**: github-markdown-css 主题文件
 2. **自定义样式**: styles.css
-3. **核心库**: marked.js, DOMPurify
+3. **核心库**: markdown-it, docx, DOMPurify
 4. **转换库**: html2canvas, jsPDF
 5. **应用逻辑**: translations.js, popup.js
 

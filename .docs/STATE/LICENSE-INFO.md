@@ -32,12 +32,12 @@
 
 ### 核心依赖库
 
-#### marked.js
+#### markdown-it
 - **许可证**: MIT License
-- **版本**: 4.0.0+
+- **版本**: 13.0.0+
 - **兼容性**: ✅ 与 Apache License 2.0 兼容
 - **用途**: Markdown 解析和渲染
-- **文件**: `lib/marked.min.js`
+- **文件**: `lib/markdown-it.min.js`
 
 #### html2canvas
 - **许可证**: MIT License
@@ -53,6 +53,13 @@
 - **用途**: HTML 转 PDF 功能
 - **文件**: `lib/jspdf.umd.min.js`
 
+#### docx
+- **许可证**: MIT License
+- **版本**: 8.5.0+
+- **兼容性**: ✅ 与 Apache License 2.0 兼容
+- **用途**: Word 文档生成功能
+- **文件**: `lib/docx.min.js`
+
 #### DOMPurify
 - **许可证**: Apache License 2.0
 - **版本**: 3.0.0+
@@ -66,6 +73,13 @@
 - **兼容性**: ✅ 与 Apache License 2.0 兼容
 - **用途**: GitHub 风格的 Markdown 主题
 - **文件**: `css/github-markdown-light.min.css`, `css/github-markdown-dark.min.css`
+
+#### html-docx-js
+- **许可证**: MIT License
+- **版本**: master (2024-07)
+- **兼容性**: ✅ 与 Apache License 2.0 兼容
+- **用途**: HTML 转 Word（.docx）
+- **文件**: `lib/html-docx.min.js`
 
 ## 许可证兼容性矩阵
 
