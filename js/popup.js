@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportHtmlButton = document.getElementById('export-html');
   const exportMdButton = document.getElementById('export-md');
   const loadingElement = document.getElementById('loading');
-  const messageElement = document.getElementById('message');
+  const notificationContainer = document.getElementById('notification-container');
   const themeToggle = document.getElementById('theme-toggle');
   const themeStyle = document.getElementById('theme-style');
   const bodyEl = document.body;
@@ -32,11 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 更新UI文本
   function updateUIText() {
     document.querySelector('h1').textContent = translations[currentLang].title;
-    document.querySelector('.input-section h2').textContent = translations[currentLang].input;
+    document.querySelector('.input-header h2').textContent = translations[currentLang].input;
     document.querySelector('.preview-section h2').textContent = translations[currentLang].preview;
-    pasteButton.textContent = translations[currentLang].paste;
-    clearButton.textContent = translations[currentLang].clear;
-    historyBtn.textContent = translations[currentLang].history;
+    
+    // 更新操作按钮文本
+    document.querySelector('#paste-button .action-text').textContent = translations[currentLang].paste;
+    document.querySelector('#clear-button .action-text').textContent = translations[currentLang].clear;
+    document.querySelector('#history-btn .action-text').textContent = translations[currentLang].history;
+    
     exportImageButton.textContent = translations[currentLang].exportImage;
     exportPdfButton.textContent = translations[currentLang].exportPdf;
     exportWordButton.textContent = translations[currentLang].exportWord;
@@ -73,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     markdownInput.value = '';
     renderMarkdown();
     localStorage.setItem('isCleared', 'true'); // Set the cleared state
-    showMessage('clearSuccess', 'success');
+    showNotification('内容已清空', 'success');
   });
 
   // 导出为长图
@@ -102,8 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
   historyBtn.addEventListener('click', () => {
     loadHistory(); // Always reload history when opening the modal
     historyModal.classList.remove('hidden');
+    setTimeout(() => historyModal.classList.add('visible'), 10);
   });
-  closeHistoryModalBtn.addEventListener('click', () => historyModal.classList.add('hidden'));
+  
+  closeHistoryModalBtn.addEventListener('click', () => {
+    historyModal.classList.remove('visible');
+    setTimeout(() => historyModal.classList.add('hidden'), 300);
+  });
+  
   clearHistoryBtn.addEventListener('click', handleClearHistory);
 
   // 初始化
@@ -130,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (history.length > 0) {
       markdownInput.value = history[0].content;
       renderMarkdown();
-      showMessage('loadHistorySuccess', 'success');
+      showNotification('已加载上次内容', 'info');
     } else {
       pasteAndRenderFromClipboard(true);
     }
@@ -163,20 +172,225 @@ document.addEventListener('DOMContentLoaded', () => {
       if (text && text.trim()) {
         markdownInput.value = text;
         renderMarkdown();
-        if (!isSilent) showMessage('pasteSuccess', 'success');
+        if (!isSilent) showNotification('已从剪贴板粘贴内容', 'success');
       } else if (!isSilent) {
-        showMessage('clipboardEmpty', 'error');
+        showNotification('剪贴板为空', 'warning');
       }
     } catch (error) {
-      if (!isSilent) showMessage('clipboardError', 'error');
+      if (!isSilent) showNotification('无法读取剪贴板', 'error');
       console.error('剪贴板读取失败:', error);
+    }
+  }
+  
+  // 显示通知
+  function showNotification(message, type = 'info', duration = 3000) {
+    // 定义通知图标
+    const icons = {
+      'success': '✅',
+      'error': '❌',
+      'warning': '⚠️',
+      'info': 'ℹ️'
+    };
+    
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    const notificationContent = document.createElement('div');
+    notificationContent.className = 'notification-content';
+    
+    const icon = document.createElement('span');
+    icon.className = 'notification-icon';
+    icon.textContent = icons[type];
+    
+    const messageEl = document.createElement('span');
+    messageEl.className = 'notification-message';
+    messageEl.textContent = message;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'notification-close';
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', () => {
+      notification.classList.add('closing');
+      setTimeout(() => notification.remove(), 300);
+    });
+    
+    notificationContent.appendChild(icon);
+    notificationContent.appendChild(messageEl);
+    notification.appendChild(notificationContent);
+    notification.appendChild(closeBtn);
+    
+    notificationContainer.appendChild(notification);
+    
+    // 自动消失
+    setTimeout(() => {
+      notification.classList.add('closing');
+      setTimeout(() => notification.remove(), 300);
+    }, duration);
+  }
+
+  // 显示/隐藏加载状态
+  function showLoading(show) {
+    if (show) {
+      loadingElement.classList.remove('hidden');
+    } else {
+      loadingElement.classList.add('hidden');
+    }
+  }
+
+  // 处理历史记录
+  async function loadHistory() {
+    try {
+      const history = JSON.parse(localStorage.getItem('markdownHistory')) || [];
+      renderHistoryUI(history);
+      return history;
+    } catch (error) {
+      console.error('加载历史记录失败:', error);
+      return [];
+    }
+  }
+  
+  // 渲染历史记录UI
+  function renderHistoryUI(history) {
+    historyList.innerHTML = '';
+    if (history.length === 0) {
+      const emptyMessage = document.createElement('p');
+      emptyMessage.textContent = translations[currentLang].historyEmpty || '没有历史记录';
+      emptyMessage.style.padding = '20px';
+      emptyMessage.style.textAlign = 'center';
+      historyList.appendChild(emptyMessage);
+      return;
+    }
+
+    history.forEach((item, index) => {
+      const historyItem = document.createElement('div');
+      historyItem.className = 'history-item';
+      
+      const name = document.createElement('div');
+      name.className = 'item-name';
+      name.textContent = item.name || `记录 ${index + 1}`;
+      
+      const date = document.createElement('div');
+      date.className = 'item-date';
+      date.textContent = new Date(item.date).toLocaleString();
+      
+      const actions = document.createElement('div');
+      actions.className = 'item-actions';
+      
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = translations[currentLang].restore || '恢复';
+      restoreBtn.addEventListener('click', () => handleRestoreHistory(index));
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = translations[currentLang].delete || '删除';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.addEventListener('click', () => handleDeleteHistory(index));
+      
+      actions.appendChild(restoreBtn);
+      actions.appendChild(deleteBtn);
+      
+      historyItem.appendChild(name);
+      historyItem.appendChild(date);
+      historyItem.appendChild(actions);
+      
+      historyList.appendChild(historyItem);
+    });
+  }
+  
+  // 处理恢复历史记录
+  async function handleRestoreHistory(index) {
+    try {
+      const history = JSON.parse(localStorage.getItem('markdownHistory')) || [];
+      if (history[index]) {
+        markdownInput.value = history[index].content;
+        renderMarkdown();
+        historyModal.classList.remove('visible');
+        setTimeout(() => historyModal.classList.add('hidden'), 300);
+        showNotification('已恢复历史内容', 'success');
+      }
+    } catch (error) {
+      console.error('恢复历史记录失败:', error);
+      showNotification('恢复历史记录失败', 'error');
+    }
+  }
+  
+  // 处理删除历史记录
+  async function handleDeleteHistory(index) {
+    try {
+      const history = JSON.parse(localStorage.getItem('markdownHistory')) || [];
+      history.splice(index, 1);
+      localStorage.setItem('markdownHistory', JSON.stringify(history));
+      renderHistoryUI(history);
+      showNotification('已删除历史记录', 'success');
+    } catch (error) {
+      console.error('删除历史记录失败:', error);
+      showNotification('删除历史记录失败', 'error');
+    }
+  }
+  
+  // 处理清空历史记录
+  async function handleClearHistory() {
+    try {
+      localStorage.removeItem('markdownHistory');
+      renderHistoryUI([]);
+      showNotification('已清空所有历史记录', 'success');
+    } catch (error) {
+      console.error('清空历史记录失败:', error);
+      showNotification('清空历史记录失败', 'error');
+    }
+  }
+  
+  // 处理导出
+  async function handleExport(exportFunc) {
+    try {
+      // 保存当前内容到历史记录
+      await saveToHistory();
+      
+      // 执行导出
+      await exportFunc();
+    } catch (error) {
+      console.error('导出失败:', error);
+      showNotification('导出失败: ' + error.message, 'error');
+      showLoading(false);
+    }
+  }
+  
+  // 保存到历史记录
+  async function saveToHistory() {
+    const content = markdownInput.value.trim();
+    if (!content) return;
+    
+    try {
+      // 获取现有历史
+      const history = JSON.parse(localStorage.getItem('markdownHistory')) || [];
+      
+      // 添加新条目
+      const newEntry = {
+        content,
+        date: new Date().toISOString(),
+        name: `记录 ${history.length + 1}`
+      };
+      
+      // 插入到开头
+      history.unshift(newEntry);
+      
+      // 限制最大记录数
+      if (history.length > 10) {
+        history.pop();
+      }
+      
+      // 保存
+      localStorage.setItem('markdownHistory', JSON.stringify(history));
+      localStorage.removeItem('isCleared'); // Clear the cleared state
+    } catch (error) {
+      console.error('保存历史失败:', error);
     }
   }
 
   // 导出为长图
   async function exportAsImage() {
     if (!markdownInput.value.trim()) {
-      showMessage('noContent', 'error');
+      showNotification('没有内容可导出', 'warning');
       return;
     }
 
@@ -199,44 +413,37 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // 根据主题设置背景色和文本色
       if (isDark) {
-        tempContainer.style.backgroundColor = '#0d1117'; // GitHub暗色模式背景色
+        tempContainer.style.backgroundColor = '#0d1117';
         tempContainer.style.color = '#c9d1d9';
       } else {
         tempContainer.style.backgroundColor = 'white';
         tempContainer.style.color = '#24292f';
       }
       
-      tempContainer.innerHTML = previewContainer.innerHTML;
-      
-      // 添加主题样式
-      const themeStyle = document.createElement('style');
-      themeStyle.textContent = isDark ? 
-        await fetch(chrome.runtime.getURL('css/github-markdown-dark.min.css')).then(res => res.text()) :
-        await fetch(chrome.runtime.getURL('css/github-markdown-light.min.css')).then(res => res.text());
-      
-      tempContainer.appendChild(themeStyle);
+      // 填充内容
+      tempContainer.innerHTML = DOMPurify.sanitize(md.render(markdownInput.value));
       document.body.appendChild(tempContainer);
-
+      
       // 使用html2canvas生成图片
       const canvas = await html2canvas(tempContainer, {
-        scale: 2, // 提高清晰度
-        useCORS: true,
-        logging: false,
-        allowTaint: false,
+        scale: 2, // 提高分辨率
+        useCORS: true, // 允许跨域
+        allowTaint: true, // 允许污染
         backgroundColor: isDark ? '#0d1117' : 'white'
       });
-
+      
+      // 移除临时容器
       document.body.removeChild(tempContainer);
-
-      // 将canvas转为图片并下载
-      const imageData = canvas.toDataURL('image/png');
-      const timestamp = new Date().getTime();
-      downloadFile(imageData, `markdown_${timestamp}.png`);
-
-      showMessage('exportImageSuccess', 'success');
+      
+      // 将Canvas转为图片
+      const imgData = canvas.toDataURL('image/png');
+      
+      // 下载图片
+      downloadFile(imgData, 'markdown_export.png');
+      showNotification('图片已导出', 'success');
     } catch (error) {
-      showMessage('exportImageError', 'error');
-      console.error('导出长图错误:', error);
+      console.error('导出图片失败:', error);
+      showNotification('导出图片失败', 'error');
     } finally {
       showLoading(false);
     }
@@ -245,14 +452,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 导出为PDF
   async function exportAsPdf() {
     if (!markdownInput.value.trim()) {
-      showMessage('noContent', 'error');
+      showNotification('没有内容可导出', 'warning');
       return;
     }
 
     showLoading(true);
 
     try {
-      // 创建临时容器
+      // 创建一个临时容器，用于生成PDF
       const tempContainer = document.createElement('div');
       tempContainer.className = 'preview-container-export markdown-body';
       
@@ -260,82 +467,63 @@ document.addEventListener('DOMContentLoaded', () => {
       const isDark = themeToggle.checked;
       
       // 设置容器样式
-      tempContainer.style.width = '800px';
-      tempContainer.style.padding = '40px';
+      tempContainer.style.width = '210mm'; // A4宽度
+      tempContainer.style.padding = '20mm'; // 页面边距
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.top = '-9999px';
       
       // 根据主题设置背景色和文本色
       if (isDark) {
-        tempContainer.style.backgroundColor = '#0d1117'; // GitHub暗色模式背景色
+        tempContainer.style.backgroundColor = '#0d1117';
         tempContainer.style.color = '#c9d1d9';
       } else {
         tempContainer.style.backgroundColor = 'white';
         tempContainer.style.color = '#24292f';
       }
       
-      tempContainer.innerHTML = previewContainer.innerHTML;
-      
-      // 添加主题样式
-      const themeStyle = document.createElement('style');
-      themeStyle.textContent = isDark ? 
-        await fetch(chrome.runtime.getURL('css/github-markdown-dark.min.css')).then(res => res.text()) :
-        await fetch(chrome.runtime.getURL('css/github-markdown-light.min.css')).then(res => res.text());
-      
-      tempContainer.appendChild(themeStyle);
+      // 填充内容
+      tempContainer.innerHTML = DOMPurify.sanitize(md.render(markdownInput.value));
       document.body.appendChild(tempContainer);
-
+      
       // 使用html2canvas生成图片
       const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        allowTaint: false,
+        scale: 2, // 提高分辨率
+        useCORS: true, // 允许跨域
+        allowTaint: true, // 允许污染
         backgroundColor: isDark ? '#0d1117' : 'white'
       });
-
+      
+      // 移除临时容器
       document.body.removeChild(tempContainer);
-
-      // 创建PDF文档
-      const imgWidth = 210; // A4宽度，单位mm
-      const pageHeight = 297; // A4高度，单位mm
+      
+      // 计算PDF的宽度和高度
+      const imgWidth = 210; // mm
+      const pageHeight = 297; // mm
       const imgHeight = canvas.height * imgWidth / canvas.width;
       let heightLeft = imgHeight;
+      
+      // 创建PDF文档
+      const pdf = new window.jspdf.jsPDF('p', 'mm');
       let position = 0;
       
-      const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-      let firstPage = true;
-
-      // 处理分页
+      // 将Canvas添加到PDF，如果内容超过一页则创建多页
+      pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
       while (heightLeft > 0) {
-        if (!firstPage) {
-          pdf.addPage();
-        } else {
-          firstPage = false;
-        }
-
-        pdf.addImage(
-          canvas.toDataURL('image/png'), 
-          'PNG', 
-          0, 
-          position, 
-          imgWidth, 
-          imgHeight
-        );
-        
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
-        position -= pageHeight;
       }
-
-      // 下载PDF
-      const timestamp = new Date().getTime();
-      pdf.save(`markdown_${timestamp}.pdf`);
-
-      showMessage('exportPdfSuccess', 'success');
+      
+      // 下载PDF文件
+      pdf.save('markdown_export.pdf');
+      showNotification('PDF已导出', 'success');
     } catch (error) {
-      showMessage('exportPdfError', 'error');
-      console.error('导出PDF错误:', error);
+      console.error('导出PDF失败:', error);
+      showNotification('导出PDF失败', 'error');
     } finally {
       showLoading(false);
     }
@@ -344,231 +532,132 @@ document.addEventListener('DOMContentLoaded', () => {
   // 导出为Word
   async function exportAsWord() {
     if (!markdownInput.value.trim()) {
-      showMessage('noContent', 'error');
+      showNotification('没有内容可导出', 'warning');
       return;
     }
+
     showLoading(true);
+
     try {
-      // 获取预览区HTML
-      const previewContent = previewContainer.innerHTML;
-      if (!previewContent.trim()) {
-        showMessage('noContent', 'error');
-        showLoading(false);
-        return;
-      }
-      // 包裹完整HTML结构，保证样式
-      const isDark = themeToggle.checked;
-      const themeCssUrl = isDark ? 'github-markdown-dark.min.css' : 'github-markdown-light.min.css';
-      const themeCss = await fetch(chrome.runtime.getURL(`css/${themeCssUrl}`)).then(res => res.text());
-      const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body { font-family: sans-serif; padding: 2rem 4rem; }
-    .markdown-body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; }
-    ${themeCss}
-  </style>
-</head>
-<body class="${isDark ? 'dark-mode' : ''}">
-  <article class="markdown-body">
-    ${previewContent}
-  </article>
-</body>
-</html>`;
-      // 用html-docx-js生成Word Blob
+      // 创建一个临时容器，用于生成Word文档
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = DOMPurify.sanitize(md.render(markdownInput.value));
+      
+      // 使用mammoth.js将HTML转换为Word文档
+      const html = tempContainer.innerHTML;
+      
+      // 使用html-docx-js将HTML转换为Word文档
       const converted = window.htmlDocx.asBlob(html);
-      const timestamp = new Date().getTime();
-      downloadFile(URL.createObjectURL(converted), `markdown_${timestamp}.docx`, true);
-      showMessage('exportWordSuccess', 'success');
+      
+      // 下载Word文件
+      downloadFile(converted, 'markdown_export.docx', true);
+      showNotification('Word文档已导出', 'success');
     } catch (error) {
-      showMessage('exportWordError', 'error');
-      console.error('导出Word错误:', error);
+      console.error('导出Word失败:', error);
+      showNotification('导出Word失败', 'error');
     } finally {
       showLoading(false);
     }
   }
 
-  // 导出为MD
+  // 导出为Markdown文件
   function exportAsMd() {
-    const content = markdownInput.value;
-    if (!content.trim()) {
-      showMessage('noContent', 'error');
+    if (!markdownInput.value.trim()) {
+      showNotification('没有内容可导出', 'warning');
       return;
     }
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-    const timestamp = new Date().getTime();
-    downloadFile(URL.createObjectURL(blob), `markdown_${timestamp}.md`, true);
+
+    try {
+      // 创建一个Blob对象
+      const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+      
+      // 下载文件
+      downloadFile(blob, 'markdown_export.md', true);
+      showNotification('Markdown文件已导出', 'success');
+    } catch (error) {
+      console.error('导出Markdown失败:', error);
+      showNotification('导出Markdown失败', 'error');
+    }
   }
 
-  // 导出为HTML
+  // 导出为HTML文件
   async function exportAsHtml() {
-    const previewContent = previewContainer.innerHTML;
-    if (!previewContent.trim()) {
-      showMessage('noContent', 'error');
+    if (!markdownInput.value.trim()) {
+      showNotification('没有内容可导出', 'warning');
       return;
     }
 
     showLoading(true);
+
     try {
-      const title = markdownInput.value.split('\n')[0].replace(/#/g, '').trim() || 'Markdown Export';
+      // 获取当前主题的样式表内容
       const isDark = themeToggle.checked;
-      const themeCssUrl = isDark ? 'github-markdown-dark.min.css' : 'github-markdown-light.min.css';
-      const themeCss = await fetch(chrome.runtime.getURL(`css/${themeCssUrl}`)).then(res => res.text());
-
-      const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>${title}</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem 4rem;
-    }
-    .markdown-body {
-      box-sizing: border-box;
-      min-width: 200px;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    ${themeCss}
-  </style>
-</head>
-<body class="${isDark ? 'dark-mode' : ''}">
-  <article class="markdown-body">
-    ${previewContent}
-  </article>
-</body>
-</html>`;
-
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const timestamp = new Date().getTime();
-      downloadFile(URL.createObjectURL(blob), `markdown_${timestamp}.html`, true);
-      showMessage('exportHtmlSuccess', 'success');
+      const styleUrl = isDark ? 'css/github-markdown-dark.min.css' : 'css/github-markdown-light.min.css';
+      
+      const styleResponse = await fetch(styleUrl);
+      const styleContent = await styleResponse.text();
+      
+      // 创建完整的HTML文档
+      const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Markdown Export</title>
+        <style>
+          body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+            background-color: ${isDark ? '#0d1117' : 'white'};
+          }
+          @media (max-width: 767px) {
+            body {
+              padding: 15px;
+            }
+          }
+          ${styleContent}
+        </style>
+      </head>
+      <body>
+        <article class="markdown-body">
+          ${DOMPurify.sanitize(md.render(markdownInput.value))}
+        </article>
+      </body>
+      </html>
+      `;
+      
+      // 创建一个Blob对象
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      
+      // 下载文件
+      downloadFile(blob, 'markdown_export.html', true);
+      showNotification('HTML文件已导出', 'success');
     } catch (error) {
-      showMessage('exportHtmlError', 'error');
-      console.error('导出HTML错误:', error);
+      console.error('导出HTML失败:', error);
+      showNotification('导出HTML失败', 'error');
     } finally {
       showLoading(false);
     }
   }
 
-  // 下载文件
+  // 下载文件的通用函数
   function downloadFile(data, fileName, shouldRevoke = false) {
     const link = document.createElement('a');
-    link.href = data;
+    link.href = typeof data === 'string' ? data : URL.createObjectURL(data);
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    if (shouldRevoke) {
-      URL.revokeObjectURL(data);
+    
+    if (shouldRevoke && typeof data !== 'string') {
+      URL.revokeObjectURL(link.href);
     }
   }
 
-  // 显示/隐藏加载动画
-  function showLoading(show) {
-    loadingElement.classList.toggle('hidden', !show);
-  }
-
-  // 显示消息
-  function showMessage(text, type) {
-    const key = text in translations[currentLang] ? text : 'unknown';
-    const message = translations[currentLang][key] || text;
-    messageElement.textContent = message;
-    messageElement.className = `message ${type}`;
-    messageElement.classList.remove('hidden');
-    setTimeout(() => {
-      messageElement.classList.add('hidden');
-    }, 3000);
-  }
-
-  // --- History Management ---
-  const MAX_HISTORY_LENGTH = 20;
-
-  async function loadHistory() {
-      const data = await chrome.storage.local.get('history');
-      const history = data.history || [];
-      renderHistoryUI(history);
-      return history; // Return history for init function
-  }
-  
-  function renderHistoryUI(history) {
-      historyList.innerHTML = '';
-      if(history.length === 0) {
-          historyList.innerHTML = '<p style="text-align:center; color:#868e96;">暂无历史记录</p>';
-          return;
-      }
-      history.forEach((entry, index) => {
-          const item = document.createElement('div');
-          item.className = 'history-item';
-          item.dataset.index = index;
-          item.innerHTML = `
-              <span class="item-name">${entry.content.substring(0, 50).replace(/</g, "&lt;")}...</span>
-              <span class="item-date">${new Date(entry.timestamp).toLocaleString()}</span>
-          `;
-          historyList.appendChild(item);
-      });
-      
-      historyList.querySelectorAll('.history-item').forEach(item => {
-          item.addEventListener('click', (e) => {
-              handleRestoreHistory(parseInt(e.currentTarget.dataset.index));
-          });
-      });
-  }
-
-  async function handleRestoreHistory(index) {
-      const data = await chrome.storage.local.get('history');
-      const history = data.history || [];
-      if(history[index]) {
-          markdownInput.value = history[index].content;
-          renderMarkdown();
-          historyModal.classList.add('hidden');
-          showMessage('restoreHistorySuccess', 'success');
-      }
-  }
-  
-  async function handleClearHistory() {
-      if(confirm('您确定要清空所有历史记录吗？此操作无法撤销。')) {
-          await chrome.storage.local.set({ history: [] });
-          renderHistoryUI([]);
-          showMessage('clearHistorySuccess', 'success');
-      }
-  }
-
-  // --- Export Handling ---
-  async function handleExport(exportFunc) {
-      if (!markdownInput.value.trim()) {
-          showMessage('noContent', 'error');
-          return;
-      }
-      // Any export action clears the 'cleared' state
-      localStorage.removeItem('isCleared');
-      await saveToHistory(); // Save before exporting
-      await exportFunc();
-  }
-
-  // --- History Management ---
-  async function saveToHistory() {
-    const content = markdownInput.value.trim();
-    if (!content) return;
-    
-    let data = await chrome.storage.local.get('history');
-    let history = data.history || [];
-    
-    // Avoid saving duplicates
-    if(history.length > 0 && history[0].content === content) return;
-
-    history.unshift({ content, timestamp: Date.now() });
-    if (history.length > MAX_HISTORY_LENGTH) {
-      history.pop();
-    }
-    await chrome.storage.local.set({ history });
-  }
-
-  // 页面加载后执行初始化
+  // 初始化应用
   init();
 }); 

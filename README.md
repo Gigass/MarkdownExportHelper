@@ -20,6 +20,9 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
   - Loads the latest history record upon opening.
   - If history is empty, it attempts to read and display content from your clipboard.
 - **Elegant & Modern UI**: A carefully designed interface with a focus on user experience, featuring a card-style layout and premium aesthetics.
+  - **Modern Notifications**: Sleek notification system with animations and different message types
+  - **Improved Dark Mode**: Complete dark mode experience with proper code block highlighting
+  - **Enhanced Interactions**: Smooth transitions, button animations, and intuitive controls
 
 ## 🚀 Installation
 
@@ -47,11 +50,19 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 ## 🛠️ Tech Stack
 
 - **Core**: Vanilla JavaScript
-- **Markdown Parsing**: [marked.js](https://github.com/markedjs/marked)
+- **Markdown Parsing**: [markdown-it](https://github.com/markdown-it/markdown-it)
 - **HTML to Image**: [html2canvas](https://github.com/niklasvh/html2canvas)
 - **HTML to PDF**: [jsPDF](https://github.com/parallax/jsPDF)
 - **Security**: [DOMPurify](https://github.com/cure53/DOMPurify)
 - **Styling**: [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) for themes.
+
+## 🆕 What's New (July 2025)
+
+- **Modern UI**: Complete UI overhaul with improved layout and aesthetics
+- **Enhanced Notifications**: New notification system with different status types and animations
+- **Fixed Dark Mode**: Improved dark mode with proper code block styling
+- **Smooth Animations**: Added transition effects and animations throughout the interface
+- **Improved History Management**: Enhanced history management with individual record deletion
 
 ---
 
@@ -73,6 +84,9 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
   - 打开时自动加载最新的历史记录。
   - 如果历史记录为空，则尝试从剪贴板读取并展示内容。
 - **优雅与现代化的界面**: 精心设计的用户界面，注重用户体验，采用卡片式布局和高级感的美学设计。
+  - **现代通知系统**: 优雅的通知组件，带有动画和不同类型的状态提示
+  - **优化的暗黑模式**: 完善的暗黑模式体验，代码块正确适配暗色主题
+  - **增强的交互体验**: 平滑过渡、按钮动效和直观的操作控件
 
 ## 🚀 安装方法
 
@@ -101,11 +115,19 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 ## 🛠️ 技术栈
 
 - **核心**: 原生 JavaScript
-- **Markdown 解析**: [marked.js](https://github.com/markedjs/marked)
+- **Markdown 解析**: [markdown-it](https://github.com/markdown-it/markdown-it)
 - **HTML 转图片**: [html2canvas](https://github.com/niklasvh/html2canvas)
 - **HTML 转 PDF**: [jsPDF](https://github.com/parallax/jsPDF)
 - **安全处理**: [DOMPurify](https://github.com/cure53/DOMPurify)
 - **样式**: [github-markdown-css](https://github.com/sindresorhus/github-markdown-css) 用于主题渲染。
+
+## 🆕 最新更新 (2025年7月)
+
+- **现代化界面**: 完全重新设计的用户界面，改进布局和美学
+- **增强通知系统**: 全新的通知组件，支持不同状态类型和动画效果
+- **修复暗黑模式**: 改进的暗黑模式，修复代码块样式问题
+- **平滑动画**: 在整个界面中添加了过渡效果和动画
+- **历史记录管理优化**: 增强的历史记录管理，支持单条记录删除
 
 ## 注意事项
 

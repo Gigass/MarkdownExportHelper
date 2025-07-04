@@ -39,14 +39,24 @@
     </div>
     
     <div class="input-section">
-      <h2>Markdown输入</h2>
+      <div class="input-header">
+        <h2>Markdown输入</h2>
+        <div class="input-actions">
+          <button id="paste-button" class="action-btn">
+            <span class="action-icon">📋</span>
+            <span class="action-text">从剪贴板粘贴</span>
+          </button>
+          <button id="clear-button" class="action-btn">
+            <span class="action-icon">🗑️</span>
+            <span class="action-text">清空</span>
+          </button>
+          <button id="history-btn" class="action-btn">
+            <span class="action-icon">📜</span>
+            <span class="action-text">历史记录</span>
+          </button>
+        </div>
+      </div>
       <textarea id="markdown-input" placeholder="在此粘贴Markdown文本..."></textarea>
-      <button id="paste-button">从剪贴板粘贴</button>
-      <button id="clear-button">清空</button>
-    </div>
-    
-    <div class="pro-features">
-      <button id="history-btn" class="control-element">历史记录</button>
     </div>
     
     <div class="preview-section">
@@ -67,7 +77,8 @@
       <p>正在导出，请稍候...</p>
     </div>
     
-    <div id="message" class="hidden"></div>
+    <!-- 新增通知系统 -->
+    <div id="notification-container"></div>
   </div>
 
   <!-- History Modal -->
