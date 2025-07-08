@@ -17,8 +17,7 @@
     }
   },
   "permissions": [
-    "clipboardRead",
-    "storage"
+    "clipboardRead"
   ],
   "web_accessible_resources": [{
     "resources": ["css/*.css"],
