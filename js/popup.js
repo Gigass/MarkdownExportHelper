@@ -433,8 +433,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // 使用html2canvas生成图片
       const canvas = await html2canvas(tempContainer, {
         scale: 2, // 提高分辨率
-        useCORS: true, // 允许跨域
-        allowTaint: true, // 允许污染
+        useCORS: false, // 禁止跨域
+        allowTaint: false, // 禁止污染
         backgroundColor: isDark ? '#0d1117' : 'white'
       });
       
@@ -495,8 +495,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // 使用html2canvas生成图片
       const canvas = await html2canvas(tempContainer, {
         scale: 2, // 提高分辨率
-        useCORS: true, // 允许跨域
-        allowTaint: true, // 允许污染
+        useCORS: false, // 禁止跨域
+        allowTaint: false, // 禁止污染
         backgroundColor: isDark ? '#0d1117' : 'white'
       });
       
