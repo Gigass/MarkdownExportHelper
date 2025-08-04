@@ -12,6 +12,7 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 - **Multiple Export Formats**: 
   - **Long Image (PNG)**: Export the rendered content as a single, high-quality PNG image.
   - **PDF Document**: Generate a PDF file from the rendered content, with proper pagination for longer text.
+  - **Word Document (Beta)**: Export the rendered content as a `.docx` file, preserving styles.
   - **Styled HTML**: Export a self-contained HTML file with your chosen theme (light or dark).
   - **Raw Markdown**: Save the original Markdown text as a `.md` file.
 - **Dual-Theme Mode**: Switch between a clean **Light Mode** and an eye-friendly **Dark Mode**. The exported files will reflect your chosen theme.
@@ -45,12 +46,13 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 3. The preview area will instantly show the rendered result.
 4. Use the toggle switch to change between light and dark themes.
 5. Click the "History" button to view and restore previous versions.
-6. Click your desired export button (`Export as Image`, `Export as PDF`, `Export HTML`, or `Export MD`) to download the file.
+6. Click your desired export button (`Export as Image`, `Export as PDF`, `Export as Word`, `Export HTML`, or `Export MD`) to download the file.
 
 ## 🛠️ Tech Stack
 
 - **Core**: Vanilla JavaScript
 - **Markdown Parsing**: [markdown-it](https://github.com/markdown-it/markdown-it)
+- **HTML to Word**: [DocShift](https://github.com/cybair/docshift) (Customized)
 - **HTML to Image**: [html2canvas](https://github.com/niklasvh/html2canvas)
 - **HTML to PDF**: [jsPDF](https://github.com/parallax/jsPDF)
 - **Security**: [DOMPurify](https://github.com/cure53/DOMPurify)
@@ -58,6 +60,7 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 
 ## 🆕 What's New (July 2025)
 
+- **Word Export**: Added the ability to export documents in `.docx` format.
 - **Modern UI**: Complete UI overhaul with improved layout and aesthetics
 - **Enhanced Notifications**: New notification system with different status types and animations
 - **Fixed Dark Mode**: Improved dark mode with proper code block styling
@@ -76,6 +79,7 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 - **多种导出格式**: 
   - **长图 (PNG)**: 将渲染后的内容导出为一张高质量的 PNG 图片。
   - **PDF 文档**: 将渲染后的内容生成 PDF 文件，并为长文本提供自动分页。
+  - **Word 文档 (测试版)**: 将渲染后的内容导出为保留样式的 `.docx` 文件。
   - **带样式的 HTML**: 导出一个包含您所选主题（亮色或暗色）的独立 HTML 文件。
   - **纯文本 Markdown**: 将原始的 Markdown 文本保存为 `.md` 文件。
 - **双主题模式**: 可在清爽的 **亮色模式** 和护眼的 **暗色模式** 之间自由切换。导出的文件也会应用您选择的主题。
@@ -110,12 +114,13 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 3. 预览区会即时展示渲染效果
 4. 使用右上角的切换开关来改变亮色/暗色主题
 5. 点击"历史记录"按钮来查看和恢复之前的版本
-6. 点击您需要的导出按钮（`导出为长图`、`导出为PDF`、`导出HTML` 或 `导出MD`）来下载文件
+6. 点击您需要的导出按钮（`导出为长图`、`导出为PDF`、`导出为Word`、`导出HTML` 或 `导出MD`）来下载文件
 
 ## 🛠️ 技术栈
 
 - **核心**: 原生 JavaScript
 - **Markdown 解析**: [markdown-it](https://github.com/markdown-it/markdown-it)
+- **HTML 转 Word**: [DocShift](https://github.com/cybair/docshift) (二次开发)
 - **HTML 转图片**: [html2canvas](https://github.com/niklasvh/html2canvas)
 - **HTML 转 PDF**: [jsPDF](https://github.com/parallax/jsPDF)
 - **安全处理**: [DOMPurify](https://github.com/cure53/DOMPurify)
@@ -123,6 +128,7 @@ A powerful and elegant Chrome extension that allows you to paste Markdown text a
 
 ## 🆕 最新更新 (2025年7月)
 
+- **Word 导出**: 新增将文档导出为 `.docx` 格式的功能。
 - **现代化界面**: 完全重新设计的用户界面，改进布局和美学
 - **增强通知系统**: 全新的通知组件，支持不同状态类型和动画效果
 - **修复暗黑模式**: 改进的暗黑模式，修复代码块样式问题
