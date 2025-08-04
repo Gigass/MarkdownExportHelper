@@ -148,11 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 应用主题
   function applyTheme(isDark) {
     if (isDark) {
-      themeStyle.href = 'css/github-markdown-dark.min.css';
+      themeStyle.href = chrome.runtime.getURL('css/github-markdown-dark.min.css');
       bodyEl.classList.add('dark-mode');
       themeToggle.checked = true;
     } else {
-      themeStyle.href = 'css/github-markdown-light.min.css';
+      themeStyle.href = chrome.runtime.getURL('css/github-markdown-light.min.css');
       bodyEl.classList.remove('dark-mode');
       themeToggle.checked = false;
     }
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 导出为PDF
+  // 导出为PDF - 复用长图逻辑
   async function exportAsPdf() {
     if (!markdownInput.value.trim()) {
       showNotification('没有内容可导出', 'warning');
@@ -465,16 +465,16 @@ document.addEventListener('DOMContentLoaded', () => {
     showLoading(true);
 
     try {
-      // 创建一个临时容器，用于生成PDF
+      // 创建一个临时容器，用于生成图片（复用长图导出逻辑）
       const tempContainer = document.createElement('div');
       tempContainer.className = 'preview-container-export markdown-body';
       
       // 获取当前主题状态
       const isDark = themeToggle.checked;
       
-      // 设置容器样式
-      tempContainer.style.width = '210mm'; // A4宽度
-      tempContainer.style.padding = '20mm'; // 页面边距
+      // 设置容器样式（与长图导出一致）
+      tempContainer.style.width = '800px';
+      tempContainer.style.padding = '40px';
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.top = '-9999px';
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tempContainer.innerHTML = DOMPurify.sanitize(md.render(markdownInput.value));
       document.body.appendChild(tempContainer);
       
-      // 使用html2canvas生成图片
+      // 使用html2canvas生成图片（与长图导出一致）
       const canvas = await html2canvas(tempContainer, {
         scale: 2, // 提高分辨率
         useCORS: false, // 禁止跨域
@@ -503,29 +503,32 @@ document.addEventListener('DOMContentLoaded', () => {
       // 移除临时容器
       document.body.removeChild(tempContainer);
       
-      // 计算PDF的宽度和高度
-      const imgWidth = 210; // mm
-      const pageHeight = 297; // mm
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
+      // 将Canvas转为图片数据
+      const imgData = canvas.toDataURL('image/png');
       
-      // 创建PDF文档
-      const pdf = new window.jspdf.jsPDF('p', 'mm');
-      let position = 0;
+      // 创建一个临时的图片元素，用html2pdf转换
+      const tempImg = document.createElement('img');
+      tempImg.src = imgData;
+      tempImg.style.width = '800px';
+      tempImg.style.height = 'auto';
+      tempImg.style.display = 'block';
       
-      // 将Canvas添加到PDF，如果内容超过一页则创建多页
-      pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // 使用html2pdf将图片转为PDF
+      await html2pdf()
+        .from(tempImg)
+        .set({
+          margin: 0,
+          filename: 'markdown_export.pdf',
+          image: { type: 'png', quality: 1 },
+          html2canvas: { scale: 1, useCORS: false, allowTaint: false },
+          jsPDF: { 
+            unit: 'px', 
+            format: [canvas.width / 2, canvas.height / 2],
+            orientation: 'portrait'
+          }
+        })
+        .save();
       
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      // 下载PDF文件
-      pdf.save('markdown_export.pdf');
       showNotification('PDF已导出', 'success');
     } catch (error) {
       console.error('导出PDF失败:', error);
@@ -535,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 导出为Word
+  // 导出为Word - 使用DocShift进行HTML到DOCX转换
   async function exportAsWord() {
     if (!markdownInput.value.trim()) {
       showNotification('没有内容可导出', 'warning');
@@ -545,22 +548,161 @@ document.addEventListener('DOMContentLoaded', () => {
     showLoading(true);
 
     try {
-      // 创建一个临时容器，用于生成Word文档
-      const tempContainer = document.createElement('div');
-      tempContainer.innerHTML = DOMPurify.sanitize(md.render(markdownInput.value));
+      // 渲染Markdown为HTML
+      const rawMarkdown = markdownInput.value;
+      const renderedHtml = md.render(rawMarkdown);
       
-      // 使用mammoth.js将HTML转换为Word文档
-      const html = tempContainer.innerHTML;
+      // 创建带样式的完整HTML文档（类似现有的HTML导出）
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Markdown Export</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 45px;
+      background-color: white;
+      color: #24292f;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    
+    h1 { font-size: 2em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+    h3 { font-size: 1.25em; }
+    h4 { font-size: 1em; }
+    h5 { font-size: 0.875em; }
+    h6 { font-size: 0.85em; color: #656d76; }
+    
+    p {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    
+    ul, ol {
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding-left: 2em;
+    }
+    
+    li {
+      margin-bottom: 0.25em;
+    }
+    
+    blockquote {
+      margin: 0;
+      padding: 0 1em;
+      color: #656d76;
+      border-left: 0.25em solid #d0d7de;
+    }
+    
+    code {
+      padding: 0.2em 0.4em;
+      margin: 0;
+      font-size: 85%;
+      background-color: rgba(175,184,193,0.2);
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    
+    pre {
+      padding: 16px;
+      overflow: auto;
+      font-size: 85%;
+      line-height: 1.45;
+      background-color: #f6f8fa;
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    
+    pre code {
+      background-color: transparent;
+      border: 0;
+      padding: 0;
+    }
+    
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      overflow: auto;
+    }
+    
+    th, td {
+      padding: 6px 13px;
+      border: 1px solid #d0d7de;
+    }
+    
+    th {
+      font-weight: 600;
+      background-color: #f6f8fa;
+    }
+    
+    tr:nth-child(2n) {
+      background-color: #f6f8fa;
+    }
+    
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+    
+    strong, b {
+      font-weight: 600;
+    }
+    
+    em, i {
+      font-style: italic;
+    }
+    
+    hr {
+      height: 0.25em;
+      padding: 0;
+      margin: 24px 0;
+      background-color: #d0d7de;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  ${renderedHtml}
+</body>
+</html>`;
+
+      // 检查DocShift是否可用
+      if (typeof window.docshift === 'undefined') {
+        throw new Error('DocShift库未加载，请刷新页面重试');
+      }
+
+      // 使用DocShift将HTML转换为DOCX
+      const docxBlob = await window.docshift.toDocx(htmlContent);
       
-      // 使用html-docx-js将HTML转换为Word文档
-      const converted = window.htmlDocx.asBlob(html);
+      // 下载文件
+      const fileName = `markdown-export-${new Date().getTime()}.docx`;
+      downloadFile(docxBlob, fileName, true);
       
-      // 下载Word文件
-      downloadFile(converted, 'markdown_export.docx', true);
-      showNotification('Word文档已导出', 'success');
+      showNotification('Word文档已导出（.docx格式）', 'success');
     } catch (error) {
       console.error('导出Word失败:', error);
-      showNotification('导出Word失败', 'error');
+      showNotification('导出Word失败: ' + error.message, 'error');
     } finally {
       showLoading(false);
     }
@@ -598,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // 获取当前主题的样式表内容
       const isDark = themeToggle.checked;
-      const styleUrl = isDark ? 'css/github-markdown-dark.min.css' : 'css/github-markdown-light.min.css';
+      const styleUrl = chrome.runtime.getURL(isDark ? 'css/github-markdown-dark.min.css' : 'css/github-markdown-light.min.css');
       
       const styleResponse = await fetch(styleUrl);
       const styleContent = await styleResponse.text();
